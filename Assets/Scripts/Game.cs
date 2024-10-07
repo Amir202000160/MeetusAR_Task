@@ -8,24 +8,12 @@ public class Game : MonoBehaviour
 
     public GameObject Player;
     public GameObject button;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    { 
-        Player =GameObject.Find("Player");
-        
+    public bool iSstartPlay=false;
 
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    // this method is called when the player clicks the start button    
     public void OnStart()
-    {
-        
-        Player.SetActive(true);
+    { 
         button.SetActive(false);
+        iSstartPlay = true;
     }
 }

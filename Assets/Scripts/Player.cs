@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SocialPlatforms.Impl;
@@ -9,39 +10,39 @@ public class Player : MonoBehaviour
    public float speed = 0.1f;
     public float jump = 10f;
     Rigidbody2D rb;
-    bool isGrounded = true;
+    public bool isGrounded = true;
     private Animator anim;
     int score=0;
     public TextMeshProUGUI scoreText;
+    public Game game;
     
-
+    
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        
-
-    }  // Update is called once per frame
-        void Update()
+        game = GameObject.Find("GameManager").GetComponent<Game>();
+    }  
+    void FixedUpdate()
+    {
+        //Checking if the game has started
+        if (game.iSstartPlay == true)
         {
-
             //Counting Gems(Scores)
             scoreText.text = "Score: " + score;
             //Counting vectors
             float Horn = Input.GetAxisRaw("Horizontal");
-            float Vert = Input.GetAxisRaw("Vertical");
-            Vector2 move = new Vector2(Horn, Vert);
-           //MOVEMENT AND ANIMATION
+            Vector2 moveLR = new Vector2(Horn, rb.linearVelocityY);
 
-        transform.Translate(move * speed * Time.deltaTime);
-      // rb.MovePosition(rb.position + move * Time.deltaTime *speed);
+            //MOVEMENT AND jUMP AND ANIMATION
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            rb.AddForce(Vector2.up * jump, ForceMode2D.Impulse);
-            isGrounded = false;
-        }
-        if (Horn < 0)
+            transform.Translate(moveLR * speed * Time.deltaTime);
+            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            {
+                Jump();
+            }
+            //Animation and making the player face the right direction
+            if (Horn < 0)
             {
                 transform.localScale = new Vector2(-1, 1);
                 anim.SetInteger("State", 1);
@@ -55,28 +56,32 @@ public class Player : MonoBehaviour
             {
                 anim.SetInteger("State", 0);
             }
-            
-           
-        }
-       
 
-    
-    private void OnCollisionEnter2D(Collision2D collision)
+        }
+
+
+    }
+            private void OnCollisionEnter2D(Collision2D collision)
+            {
+        //Checking if the player is on the ground
+           
+                    isGrounded = true;
+                
+               
+        //Collecting Gems<Scoring_System>
+            if (collision.collider.CompareTag("Gem"))
+                {
+                    score++;
+                    Debug.Log("Score: " + score);
+                    Destroy(collision.gameObject);
+                }
+    }
+    //Jumping Method
+    public void Jump()
     {
-        if (collision.collider.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
-        else
-        {
-            isGrounded = false;
-        }
-        if (collision.collider.CompareTag("Gem"))
-        {
-            score++;
-            Debug.Log("Score: " + score);
-            Destroy(collision.gameObject);
-        }
+        rb.AddForce(Vector2.up * jump, ForceMode2D.Impulse);
+        isGrounded = false;
     }
    
+    
 }
